@@ -47,7 +47,7 @@ class _streamProcessor(threading.Thread):
     def run(self):
         while RUNNING:
             if RMSDATA['RECORD_CLOCK'] != time.strftime("%Y%m%d-%H"):
-                self.filename = time.strftime("%Y%m%d-%H%M%S.wav")
+                self.filename = RECORD_PATH+time.strftime("%Y%m%d-%H%M%S.wav")
                 data = self.queue.get(1)
                 self.wf = wave.open(self.filename, 'wb')
                 self.wf.setnchannels(CHANNELS)
