@@ -31,9 +31,6 @@ stream = p.open(format=FORMAT,channels=CHANNELS,rate=RATE,input=True,frames_per_
 RMSDATA = {}
 RMSDATA['CURRENT'] = 0
 RMSDATA['DATA'] = []
-RMSDATA['TRIGGERSTART'] = None
-RMSDATA['TRIGGEREND'] = None
-RMSDATA['TRIGGERVAL'] = 10 #default
 RMSDATA['RECORD_CLOCK'] = '' #default
 RMSDATA['RECORDFLAG'] = False
 RMSDATA['_RECORDFLAG'] = False
