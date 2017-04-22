@@ -6,6 +6,8 @@ RECORD_PATH = '~/tmp/'
 HANGDELAY = 3
 # Recording trigger default threshold on startup
 THRESHOLD = 3
+# Device index of your input
+DEVICE_INDEX=12
 
 import wx
 import random
@@ -26,7 +28,12 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 8000
 p = pyaudio.PyAudio()
-stream = p.open(format=FORMAT,channels=CHANNELS,rate=RATE,input=True,input_device_index=12,frames_per_buffer=CHUNK)
+
+print "Device Information:, add proper index # to .py script"
+for i in range(p.get_device_count()):
+    print "Dev#: ",i, p.get_device_info_by_index(i).get('name')
+    
+stream = p.open(format=FORMAT,channels=CHANNELS,rate=RATE,input=True,input_device_index=DEVICE_INDEX,frames_per_buffer=CHUNK)
 
 RMSDATA = {}
 RMSDATA['CURRENT'] = 0
