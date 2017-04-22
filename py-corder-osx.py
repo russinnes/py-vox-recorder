@@ -1,4 +1,8 @@
 #!/usr/bin/python
+
+## You will need to determine the device index of the audio channel you are wanting to use!
+## 
+
 ## Default path for storing recordings
 RECORD_PATH = '~/tmp/'
 
@@ -6,6 +10,9 @@ RECORD_PATH = '~/tmp/'
 HANGDELAY = 3
 # Recording trigger default threshold on startup
 THRESHOLD = 3
+# Input device number
+INPUT_DEVICE = 12
+
 
 import wx
 import random
@@ -26,7 +33,12 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 22050
 p = pyaudio.PyAudio()
-stream = p.open(format=FORMAT,channels=CHANNELS,rate=RATE,input=True,input_device_index=12,frames_per_buffer=CHUNK)
+print "Device Information:"
+for i in range(p.get_device_count()):
+    print "Dev#: ",i, p.get_device_info_by_index(i).get('name')
+
+getaudiodevices()
+stream = p.open(format=FORMAT,channels=CHANNELS,rate=RATE,input=True,input_device_index=INPUT_DEVICE,frames_per_buffer=CHUNK)
 
 RMSDATA = {}
 RMSDATA['CURRENT'] = 0
