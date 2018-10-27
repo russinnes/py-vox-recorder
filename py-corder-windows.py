@@ -1,16 +1,30 @@
-#Windows module added by S.rees (2018)
-#For windows this will save each file as the current date and time in the folder
-#this script is run from
-
-#TODO: Fix RECORD_PATH in windows, fix label to file name.
+#!/usr/bin/python
 ## Default path for storing recordings
-RECORD_PATH = 'c:\\temp' # for windows it just saves to same folder as the program location
+RECORD_PATH = "c:/temp/" 
+# for windows it just saves to same folder as the program location
 
 # Amount of time to continue recording after input drops below threshold (smoothing)
 HANGDELAY = 3
 # Recording trigger default threshold on startup
 THRESHOLD = 3
 # Device index of your input
+
+
+import wx
+import random
+import audioop
+import pyaudio
+import threading
+import time
+import numpy as np
+import queue
+import wave
+import wx.lib.agw.peakmeter as PM
+import sys
+import getopt
+
+
+
 RUNNING = 1
 CHUNK = 2048
 FORMAT = pyaudio.paInt16
@@ -33,12 +47,15 @@ class _streamProcessor(threading.Thread):
 	def run(self):
 		while RUNNING:
 				if RMSDATA['RECORDFLAG'] ==1:
+				 try:
 					self.filename = time.strftime("%Y%m%d-%H%M%S.wav")
 					data = self.queue.get(1)
-					self.wf = wave.open(self.filename, 'wb')
+					self.wf = wave.open(RECORD_PATH+self.filename, 'wb')
 					self.wf.setnchannels(CHANNELS)
 					self.wf.setsampwidth(p.get_sample_size(FORMAT))
 					self.wf.setframerate(RATE)
+				 except Exception as e:
+					print(e)
 				while RMSDATA['RECORDFLAG']:
 					if self.queue.qsize() > 0:
 						self.wf.writeframes(self.queue.get(1))
@@ -156,40 +173,38 @@ class MyFrame(wx.Frame):
 
 		
 	def FileIndicator(self):
-		self.filedescriptor.SetLabel("py-corder-windows")
+		self.filedescriptor.SetLabel("136")
 		wx.CallLater(1000, self.FileIndicator)
 
-
-def main(argv):
-	DEVICE_INDEX=""
-	try: 
-		opts, args = getopt.getopt(argv,"hld:",["device="])
-	except getopt.GetoptError:
+argv  = sys.argv[1:]
+opts, args = getopt.getopt(argv,"hld:",["device="])
+DEVICE_INDEX=""
+try: 
+	opts, args = getopt.getopt(argv,"hld:",["device="])
+except getopt.GetoptError:
+	print 'py-coder-windows.py -l (list devices) -d device-id'
+	sys.exit(2)
+for opt, arg in opts:
+	if opt == '-h':
 		print 'py-coder-windows.py -l (list devices) -d device-id'
-		sys.exit(2)
-	for opt, arg in opts:
-		if opt == '-h':
-			print 'py-coder-windows.py -l (list devices) -d device-id'
+		sys.exit()
+	elif opt in ("-l"):
+		print ("Device Information:, add proper index # to .py script")
+		for i in range(p.get_device_count()):
+			print ("Dev#: ",i, p.get_device_info_by_index(i).get('name'))
 			sys.exit()
-		elif opt in ("-l"):
-			print ("Device Information:, add proper index # to .py script")
-			for i in range(p.get_device_count()):
-				print ("Dev#: ",i, p.get_device_info_by_index(i).get('name'))
-			sys.exit()
-		elif opt in ("-d," "--device"):
-			DEVICE_INDEX= int(arg)
-			stream = p.open(format=FORMAT,channels=CHANNELS,rate=RATE,input=True,input_device_index=DEVICE_INDEX,frames_per_buffer=CHUNK)
-			sample_queue = queue.Queue()
-			app = wx.App()
-			frame = MyFrame(None)
-			app.SetTopWindow(frame)
-			frame.Show()
-			STREAMER=_streamReader(sample_queue)
-			STREAMER.start()
-			PROCESSOR=_streamProcessor(sample_queue)
-			PROCESSOR.start()
-			RT = _recordTimer()
-			RT.start()
-			app.MainLoop()
-if __name__=="__main__":
-	main(sys.argv[1:])
+	elif opt in ("-d," "--device"):
+		DEVICE_INDEX= int(arg)
+		stream = p.open(format=FORMAT,channels=CHANNELS,rate=RATE,input=True,input_device_index=DEVICE_INDEX,frames_per_buffer=CHUNK)
+		sample_queue = queue.Queue()
+		app = wx.App()
+		frame = MyFrame(None)
+		app.SetTopWindow(frame)
+		frame.Show()
+		STREAMER=_streamReader(sample_queue)
+		STREAMER.start()
+		PROCESSOR=_streamProcessor(sample_queue)
+		PROCESSOR.start()
+		RT = _recordTimer()
+		RT.start()
+		app.MainLoop()
